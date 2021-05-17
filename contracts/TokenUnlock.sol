@@ -16,12 +16,6 @@ contract TokenUnlock is TokenUnlockData {
     	  _;
     } 
 
-    function initialize() onlyOwner public {
-    }
-    
-    function update() onlyOwner public{
-    }
-    
     /**
      * @dev constructor function. set FNX minePool contract address. 
      */ 
@@ -62,7 +56,7 @@ contract TokenUnlock is TokenUnlockData {
 
         uint256 lastIndex = lockedAllLockedFnx[user].totalItem;
         if(lastIndex>0) {
-            require(startTime> lockedAllLockedFnx[user].alloc[lastIndex-1].endTime,"starttime is earlier than last set");
+            require(startTime>=lockedAllLockedFnx[user].alloc[lastIndex-1].endTime,"starttime is earlier than last set");
         }
 
         uint256 divAmount = amount.div(allocTimes);
@@ -87,7 +81,7 @@ contract TokenUnlock is TokenUnlockData {
             onlyOperator(1)
     {
         require(startTime<endTime,"startTime is later than endTime");
-        require(now< lockedAllLockedFnx[user].alloc[roundidx].endTime,"this alloc is expired already");
+        require(now<lockedAllLockedFnx[user].alloc[roundidx].endTime,"this alloc is expired already");
         require(!lockedAllLockedFnx[user].disable,"user is diabled already");
 
         lockedAllLockedFnx[user].alloc[roundidx].startTime = startTime;
@@ -107,6 +101,7 @@ contract TokenUnlock is TokenUnlockData {
            if (now >= lockedAllLockedFnx[msg.sender].alloc[i].endTime) {
                if (lockedAllLockedFnx[msg.sender].alloc[i].amount > 0) {
                    totalRet = totalRet.add(lockedAllLockedFnx[msg.sender].alloc[i].amount);
+                   lockedAllLockedFnx[msg.sender].alloc[i].amount = 0;
                }
            }
         }
