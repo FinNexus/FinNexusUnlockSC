@@ -19,12 +19,12 @@ contract TokenUnlockData is Operator,Halt {
         mapping (uint256 => lockedItem) alloc;//the allocation table
     }
 
-    address public fnxAddress;  //fnx token address
+    address public phxAddress;  //fnx token address
 
-    mapping (address => lockedInfo) public lockedAllLockedFnx;//converting tx record for each user
+    mapping (address => lockedInfo) public allLockedPhx;//converting tx record for each user
 
-    event SetUserFnxAlloc(address indexed owner, uint256 indexed amount,uint256 indexed worth);
+    event SetUserPhxAlloc(address indexed owner, uint256 indexed amount,uint256 indexed worth);
 
-    event ClaimFnx(address indexed owner, uint256 indexed amount,uint256 indexed worth);
+    event ClaimPhx(address indexed owner, uint256 indexed amount,uint256 indexed worth);
 
 }
