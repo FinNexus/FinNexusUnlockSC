@@ -16,15 +16,13 @@ contract TokenUnlock is TokenUnlockData {
     	  _;
     }
 
-    constructor(address _phxAddress) public {
+    constructor(address _phxAddress,address multiSignature)
+        multiSignatureClient(multiSignature)
+        public
+    {
         phxAddress = _phxAddress;
     }
 
-    function setParameter(address _phxAddress) onlyOwner public{
-        require(_phxAddress != address(0));
-        phxAddress = _phxAddress;
-    }
-    
     /**
      * @dev getting back the left mine token
      * @param reciever the reciever for getting back mine token
