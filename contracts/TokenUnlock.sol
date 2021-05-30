@@ -29,7 +29,7 @@ contract TokenUnlock is TokenUnlockData {
      * @dev getting back the left mine token
      * @param reciever the reciever for getting back mine token
      */
-    function getbackLeftPhx(address reciever)  public onlyOperator(0) {
+    function getbackLeftPhx(address reciever)  public validCall {
         uint256 bal =  IERC20(phxAddress).balanceOf(address(this));
         IERC20(phxAddress).transfer(reciever,bal);
     }  
@@ -47,7 +47,7 @@ contract TokenUnlock is TokenUnlockData {
     function setUserPhxUnlockInfo(address user,uint256 amount,uint256 startTime,uint256 timeInterval,uint256 allocTimes)
         public
         inited
-        onlyOperator(1)
+        validCall
     {
         require(user!=address(0),"user address is 0");
         require(amount>0,"amount should be bigger than 0");
@@ -79,7 +79,7 @@ contract TokenUnlock is TokenUnlockData {
     function resetUserPhxUnlockInfo(address user,uint256 roundidx,uint256 amount,uint256 startTime,uint256 endTime)
             public
             inited
-            onlyOperator(1)
+            validCall
     {
         require(startTime<endTime,"startTime is later than endTime");
         require(now< allLockedPhx[user].alloc[roundidx].endTime,"this alloc is expired already");
@@ -93,7 +93,7 @@ contract TokenUnlock is TokenUnlockData {
         allLockedPhx[user].pendingAmount =  allLockedPhx[user].pendingAmount.add(amount);
     }
 
-    function claimExpiredPhx() public inited {
+    function claimExpiredPhx() public inited notHalted {
         uint256 i = 0;
         uint256 endIdx = allLockedPhx[msg.sender].totalItem ;
         uint256 totalRet=0;
@@ -136,7 +136,8 @@ contract TokenUnlock is TokenUnlockData {
     function setUserStatus(address user,bool disable)
         public
         inited
-        onlyOperator(1)
+        validCall
+        notHalted
     {
         require(user != address(0));
         allLockedPhx[user].disable = disable;
