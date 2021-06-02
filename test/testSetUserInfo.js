@@ -126,6 +126,7 @@ contract('PhxAllocTest', function (accounts) {
 
       await mulSigInst.signApplication(hash, index, { from: accounts[7] })
       await mulSigInst.signApplication(hash, index, { from: accounts[8] })
+
       initTime = startTime;
       console.log(startTime);
 
@@ -149,5 +150,63 @@ contract('PhxAllocTest', function (accounts) {
     }
   })
 
+    it('set user status', async function () {
+      var amount = web3.utils.toWei("2","ether");
+      var interval = ONE_MONTH;
+      var allocTimes = 6;
+      let block = await web3.eth.getBlock("latest");
+      startTime = block.timestamp
+
+      let lockinfo = await unLockerInst.allLockedPhx(accounts[1])
+      console.log(lockinfo)
+
+      let itemcount = parseInt(lockinfo[2].toString())
+      assert.equal(itemcount,6)
+
+      let disable = true;
+      let msgData = unLockerInst.contract.methods.setUserStatus(accounts[1],disable).encodeABI();
+      let hash = await createApplication(mulSigInst, accounts[9], unLockerInst.address, 0, msgData);
+
+      let res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved", async function() {
+        await unLockerInst.setUserStatus(accounts[1],disable, { from: accounts[9] });
+      });
+      assert.equal(res, false, "should return false")
+
+      let index = await mulSigInst.getApplicationCount(hash)
+      index = index.toNumber() - 1;
+      console.log(index);
+
+      await mulSigInst.signApplication(hash, index, { from: accounts[7] })
+      await mulSigInst.signApplication(hash, index, { from: accounts[8] })
+
+      res = await testViolation("multiSig setUserStatus: This tx is not aprroved", async function() {
+        await unLockerInst.setUserStatus(accounts[1],disable, { from: accounts[9] });
+      });
+      assert.equal(res, true, "should return true")
+
+    })
+
+  it('try Get locked PHX after disabled', async function () {
+    await time.increaseTo(initTime + 6 * ONE_MONTH + 100)
+    let block = await web3.eth.getBlock("latest");
+    let intervalNum = parseInt((block.timestamp - initTime) / ONE_MONTH)
+    console.log("timestamp=" + block.timestamp, "startTime=" + initTime, "intervalNum=" + intervalNum);
+
+    let claimable = web3.utils.fromWei(await unLockerInst.getClaimAbleBalance(accounts[1]))
+    console.log(claimable.toString(10))
+    assert.equal(claimable, 12);
+
+    let beforePhxUser = web3.utils.fromWei(await PHXInst.balanceOf(accounts[1]));
+
+    let res = await testViolation("multiSig setUserStatus: This tx is not aprroved", async function() {
+      await unLockerInst.claimExpiredPhx({ from: accounts[1] });
+    });
+    assert.equal(res, false, "should return true")
+
+    let afterPhxUser = web3.utils.fromWei(await PHXInst.balanceOf(accounts[1]));
+    let diff = afterPhxUser - beforePhxUser;
+    assert.equal(diff, 0);
+
+  })
 
 })
