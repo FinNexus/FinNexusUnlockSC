@@ -4,10 +4,11 @@ import "./TokenUnlockData.sol";
 contract TokenUnlockProxy is TokenUnlockData {
     address public logic_contract;
 
-    constructor(address _logicAddress,address multiSignature)
+    constructor(address _logicAddress,address _phxAddress,address multiSignature)
         multiSignatureClient(multiSignature)
         public
     {
+        phxAddress = _phxAddress;
         logic_contract = _logicAddress;
     }
 
@@ -23,23 +24,15 @@ contract TokenUnlockProxy is TokenUnlockData {
 
     // fall back function
     function () payable external {
-        address target = logic_contract;
+        // delegate all other functions to current implementation
+        (bool success, ) = logic_contract.delegatecall(msg.data);
         assembly {
-        // Copy the data sent to the memory address starting free mem position
-            let ptr := mload(0x40)
-            calldatacopy(ptr, 0, calldatasize)
+            let free_mem_ptr := mload(0x40)
+            returndatacopy(free_mem_ptr, 0, returndatasize)
 
-        // Proxy the call to the contract address with the provided gas and data
-            let result := delegatecall(gas, target, ptr, calldatasize, 0, 0)
-
-        // Copy the data returned by the proxied call to memory
-            let size := returndatasize
-            returndatacopy(ptr, 0, size)
-
-        // Check what the result is, return and revert accordingly
-            switch result
-            case 0 { revert(ptr, size) }
-            case 1 { return(ptr, size) }
+            switch success
+            case 0 { revert(free_mem_ptr, returndatasize) }
+            default { return(free_mem_ptr, returndatasize) }
         }
     }
 
