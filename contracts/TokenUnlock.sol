@@ -23,6 +23,9 @@ contract TokenUnlock is TokenUnlockData {
         phxAddress = _phxAddress;
     }
 
+    function update() validCall public{
+    }
+
     /**
      * @dev getting back the left mine token
      * @param reciever the reciever for getting back mine token
@@ -37,9 +40,9 @@ contract TokenUnlock is TokenUnlockData {
         return lr.pendingAmount;
     }
 
-    function getUserLockedItemInfo(address user,uint256 alloxidx) public view returns (uint256,uint256,uint256) {
+    function getUserLockedItemInfo(address user,uint256 alloxidx) public view returns (uint256,uint256,uint256,bool) {
         lockedItem storage lralloc = allLockedPhx[user].alloc[alloxidx];
-        return (lralloc.startTime,lralloc.endTime,lralloc.amount);
+        return (lralloc.startTime,lralloc.endTime,lralloc.amount,allLockedPhx[user].disable);
     }
 
     function setUserPhxUnlockInfo(address user,uint256 amount,uint256 startTime,uint256 timeInterval,uint256 allocTimes)
@@ -81,7 +84,8 @@ contract TokenUnlock is TokenUnlockData {
     {
         require(startTime<endTime,"startTime is later than endTime");
         require(now< allLockedPhx[user].alloc[roundidx].endTime,"this alloc is expired already");
-        require(!allLockedPhx[user].disable,"user is diabled already");
+        //reset do not need to check because, possible enabled after reset
+       // require(!allLockedPhx[user].disable,"user is diabled already");
 
         allLockedPhx[user].alloc[roundidx].startTime = startTime;
         allLockedPhx[user].alloc[roundidx].startTime = endTime;
@@ -92,6 +96,7 @@ contract TokenUnlock is TokenUnlockData {
     }
 
     function claimExpiredPhx() public inited notHalted {
+        require(!allLockedPhx[msg.sender].disable,"user is diabled already");
         uint256 i = 0;
         uint256 endIdx = allLockedPhx[msg.sender].totalItem ;
         uint256 totalRet=0;
@@ -127,7 +132,6 @@ contract TokenUnlock is TokenUnlockData {
                 }
             }
         }
-
         return totalRet;
     }
 
