@@ -81,7 +81,6 @@ contract('PhxAllocTest', function (accounts) {
 
     let newAddress = await unLockerProxyInst.logic_contract();
     assert.equal(newAddress,newUnLockerInst.address);
-
   })
 
 })
