@@ -47,11 +47,38 @@ contract TokenUnlock is TokenUnlockData {
         return (lralloc.startTime,lralloc.endTime,lralloc.amount,allLockedPhx[user].disable);
     }
 
+    function setAllUserPhxUnlockInfo( address[] memory users,
+                                      uint256[] memory amounts,
+                                      uint256[] memory startTimes,
+                                      uint256[] memory timeIntervals,
+                                      uint256[] memory allocTimes)
+        public
+        inited
+        onlyOperator(0)
+        validCall
+    {
+        require(users.length==amounts.length);
+        require(users.length==startTimes.length);
+        require(users.length==timeIntervals.length);
+        require(users.length==allocTimes.length);
+        uint256 i=0;
+        for(;i<users.length;i++){
+            _setUserPhxUnlockInfo(users[i],amounts[i],startTimes[i],timeIntervals[i],allocTimes[i]);
+        }
+    }
+
+
     function setUserPhxUnlockInfo(address user,uint256 amount,uint256 startTime,uint256 timeInterval,uint256 allocTimes)
         public
         inited
         onlyOperator(0)
         validCall
+    {
+        _setUserPhxUnlockInfo(user,amount,startTime,timeInterval,allocTimes);
+    }
+
+    function _setUserPhxUnlockInfo(address user,uint256 amount,uint256 startTime,uint256 timeInterval,uint256 allocTimes)
+        internal
     {
         require(user!=address(0),"user address is 0");
         require(amount>0,"amount should be bigger than 0");
@@ -68,9 +95,9 @@ contract TokenUnlock is TokenUnlockData {
         uint256 startIdx = allLockedPhx[user].totalItem;
         uint256 i;
         for (i=0;i<allocTimes;i++) {
-             allLockedPhx[user].alloc[startIdx+i] = lockedItem( startTime.add(i*timeInterval),
-                                                                startTime.add((i+1)*timeInterval),
-                                                                divAmount);
+            allLockedPhx[user].alloc[startIdx+i] = lockedItem( startTime.add(i*timeInterval),
+                startTime.add((i+1)*timeInterval),
+                divAmount);
         }
 
         allLockedPhx[user].wholeAmount = allLockedPhx[user].wholeAmount.add(amount);
@@ -79,6 +106,7 @@ contract TokenUnlock is TokenUnlockData {
 
         emit SetUserPhxAlloc(user,amount,divAmount);
     }
+
 
     function resetUserPhxUnlockInfo(address user,uint256 roundidx,uint256 amount,uint256 startTime,uint256 endTime)
             public
