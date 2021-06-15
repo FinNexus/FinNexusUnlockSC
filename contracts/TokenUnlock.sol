@@ -47,7 +47,7 @@ contract TokenUnlock is TokenUnlockData {
         return (lralloc.startTime,lralloc.endTime,lralloc.amount,allLockedPhx[user].disable);
     }
 
-    function setAllUserPhxUnlockInfo( address[] memory users,
+    function setMultiUsersPhxUnlockInfo( address[] memory users,
                                       uint256[] memory amounts,
                                       uint256[] memory startTimes,
                                       uint256[] memory timeIntervals,
