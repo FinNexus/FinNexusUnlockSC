@@ -2,7 +2,7 @@ pragma solidity =0.5.16;
 import "./Halt.sol";
 import "./Operator.sol";
 import "./multiSignatureClient.sol";
-contract TokenUnlockData is multiSignatureClient,Halt {
+contract TokenUnlockData is multiSignatureClient,Operator,Halt {
     //the locjed reward info
 
     struct lockedItem {

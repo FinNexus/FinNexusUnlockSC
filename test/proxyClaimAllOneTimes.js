@@ -52,8 +52,10 @@ contract('PhxAllocTest', function (accounts) {
      unLockerProxyInst = await TokenUnlockerProxy.new(unLockerInst.address,PHXInst.address,mulSigInst.address);
      console.log("proxy address:" + unLockerProxyInst.address);
 
-     unLockerInst = await TokenUnlocker.at(unLockerProxyInst.address);
+      unLockerInst = await TokenUnlocker.at(unLockerProxyInst.address);
       console.log("2 unlocker address:" + unLockerInst.address);
+
+      unLockerInst.setOperator(0,accounts[9])
 
       tx = await PHXInst.mint(unLockerInst.address,new BN(phxAmount).mul(new BN(3)));
       assert.equal(tx.receipt.status,true);
