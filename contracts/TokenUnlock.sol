@@ -25,7 +25,7 @@ contract TokenUnlock is TokenUnlockData {
 
 
 
-    function update() validCall public{
+    function update() public onlyOperator(1) validCall {
     }
 
     /**
