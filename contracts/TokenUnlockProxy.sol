@@ -110,6 +110,9 @@ contract TokenUnlockProxy is Proxy,TokenUnlockData {
      */
     bytes32 internal constant IMPLEMENTATION_SLOT = keccak256("org.Phoenix.implementation.unlocksc");
 
+    function proxyType() public pure returns (uint256){
+        return 2;
+    }
 
     function implementation() public view returns (address) {
         return _implementation();
