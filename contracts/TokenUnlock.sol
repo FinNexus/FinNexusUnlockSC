@@ -16,8 +16,8 @@ contract TokenUnlock is TokenUnlockData {
     	  _;
     }
 
-    constructor(address _phxAddress,address multiSignature)
-        multiSignatureClient(multiSignature)
+    constructor(address _phxAddress,address _multiSignature)
+        multiSignatureClient(_multiSignature)
         public
     {
         phxAddress = _phxAddress;
