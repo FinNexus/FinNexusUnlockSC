@@ -69,12 +69,20 @@ contract('PhxAllocTest', function (accounts) {
         let block = await web3.eth.getBlock("latest");
         startTime = block.timestamp
 
-        let msgData = unLockerInst.contract.methods.setUserPhxUnlockInfo(accounts[1],amount,startTime,interval,allocTimes).encodeABI();
+        let accArray = [accounts[0],accounts[1],accounts[2],accounts[3],accounts[4],accounts[5],accounts[6]];
+        let amountArray = [amount,amount,amount,amount,amount,amount,amount];
+        let startTimeArray = [startTime,startTime,startTime,startTime,startTime,startTime,startTime];
+        let intervalArray = [interval,interval,interval,interval,interval,interval,interval];
+        let allocTimeArray = [allocTimes,allocTimes,allocTimes,allocTimes,allocTimes,allocTimes,allocTimes];
+
+        let msgData = unLockerInst.contract.methods.setMultiUsersPhxUnlockInfo(accArray,amountArray,startTimeArray,intervalArray,allocTimeArray).encodeABI();
+
         let hash = await createApplication(mulSigInst,accounts[9],unLockerInst.address,0,msgData);
 
         let res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved",async function(){
-            await unLockerInst.setUserPhxUnlockInfo(accounts[1],amount,startTime,interval,allocTimes,{from:accounts[9]});
+            await unLockerInst.setMultiUsersPhxUnlockInfo(accArray,amountArray,startTimeArray,intervalArray,allocTimeArray,{from:accounts[9]});
         });
+
         assert.equal(res,false,"should return false")
 
         let index = await mulSigInst.getApplicationCount(hash)
@@ -88,12 +96,15 @@ contract('PhxAllocTest', function (accounts) {
         console.log(startTime);
 
         res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved",async function(){
-            await unLockerInst.setUserPhxUnlockInfo(accounts[1],amount,startTime,interval,allocTimes,{from:accounts[9]});
+          await unLockerInst.setMultiUsersPhxUnlockInfo(accArray,amountArray,startTimeArray,intervalArray,allocTimeArray,{from:accounts[9]});
         });
         assert.equal(res,true,"should return true")
 
         startTime = startTime + ONE_MONTH*6
-        msgData = unLockerInst.contract.methods.setUserPhxUnlockInfo(accounts[1],amount,startTime,interval,allocTimes).encodeABI();
+
+        startTimeArray = [startTime,startTime,startTime,startTime,startTime,startTime,startTime];
+
+        msgData = unLockerInst.contract.methods.setMultiUsersPhxUnlockInfo(accArray,amountArray,startTimeArray,intervalArray,allocTimeArray).encodeABI();
         hash = await createApplication(mulSigInst,accounts[9],unLockerInst.address,0,msgData);
         index = await mulSigInst.getApplicationCount(hash)
         index = index.toNumber()-1;
@@ -101,14 +112,14 @@ contract('PhxAllocTest', function (accounts) {
 
         await mulSigInst.signApplication(hash,index,{from:accounts[7]})
         res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved",async function(){
-            await unLockerInst.setUserPhxUnlockInfo(accounts[1],amount,startTime,interval,allocTimes,{from:accounts[9]});
+            await unLockerInst.setMultiUsersPhxUnlockInfo(accArray,amountArray,startTimeArray,intervalArray,allocTimeArray,{from:accounts[9]});
         });
         assert.equal(res,false,"should return false")
 
         await mulSigInst.signApplication(hash,index,{from:accounts[8]})
 
         res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved",async function(){
-            await unLockerInst.setUserPhxUnlockInfo(accounts[1],amount,startTime,interval,allocTimes,{from:accounts[9]});
+            await unLockerInst.setMultiUsersPhxUnlockInfo(accArray,amountArray,startTimeArray,intervalArray,allocTimeArray,{from:accounts[9]});
         });
         assert.equal(res,true,"should return true")
 
@@ -161,40 +172,5 @@ contract('PhxAllocTest', function (accounts) {
           assert.equal(diff,claimable);
 
       })
-
-    it('Get back left phx', async function () {
-      let beforePhxUser =  web3.utils.fromWei(await PHXInst.balanceOf(accounts[1]));
-      let scBalance = web3.utils.fromWei(await PHXInst.balanceOf(unLockerInst.address));
-
-      let msgData = unLockerInst.contract.methods.getbackLeftPhx(accounts[1]).encodeABI();
-      let hash = await createApplication(mulSigInst, accounts[9], unLockerInst.address, 0, msgData);
-
-      let res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved", async function() {
-        await unLockerInst.getbackLeftPhx(accounts[1],{ from: accounts[9] });
-      });
-      assert.equal(res, false, "should return false")
-
-      let index = await mulSigInst.getApplicationCount(hash)
-      index = index.toNumber() - 1;
-      console.log(index);
-
-      await mulSigInst.signApplication(hash, index, { from: accounts[7] })
-      res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved", async function() {
-        await unLockerInst.getbackLeftPhx(accounts[1],{ from: accounts[9] });
-      });
-      assert.equal(res, false, "should return false")
-
-      await mulSigInst.signApplication(hash, index, { from: accounts[8] })
-
-      res = await testViolation("multiSig setUserPhxUnlockInfo: This tx is not aprroved", async function() {
-        await unLockerInst.getbackLeftPhx(accounts[1],{ from: accounts[9] });
-      });
-      assert.equal(res, true, "should return true")
-
-      afterPhxUser =  web3.utils.fromWei(await PHXInst.balanceOf(accounts[1]));
-      diff = afterPhxUser - beforePhxUser;
-      assert.equal(diff,scBalance,"balance should be same");
-
-    })
 
 })
