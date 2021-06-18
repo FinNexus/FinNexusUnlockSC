@@ -16,8 +16,8 @@ contract TokenUnlock is TokenUnlockData {
     	  _;
     }
 
-    constructor(address _phxAddress,address multiSignature)
-        multiSignatureClient(multiSignature)
+    constructor(address _phxAddress,address _multiSignature)
+        multiSignatureClient(_multiSignature)
         public
     {
         phxAddress = _phxAddress;
@@ -25,7 +25,7 @@ contract TokenUnlock is TokenUnlockData {
 
 
 
-    function update() validCall public{
+    function update() public onlyOperator(1) validCall {
     }
 
     /**
@@ -121,10 +121,15 @@ contract TokenUnlock is TokenUnlockData {
 
         allLockedPhx[user].alloc[roundidx].startTime = startTime;
         allLockedPhx[user].alloc[roundidx].startTime = endTime;
+
         //sub alloc amount
         allLockedPhx[user].pendingAmount =  allLockedPhx[user].pendingAmount.sub(allLockedPhx[user].alloc[roundidx].amount);
+        allLockedPhx[user].wholeAmount =  allLockedPhx[user].wholeAmount.sub(allLockedPhx[user].alloc[roundidx].amount);
+
         allLockedPhx[user].alloc[roundidx].amount = amount;
+
         allLockedPhx[user].pendingAmount =  allLockedPhx[user].pendingAmount.add(amount);
+        allLockedPhx[user].wholeAmount =  allLockedPhx[user].wholeAmount.add(amount);
     }
 
     function claimExpiredPhx() public inited notHalted {
