@@ -1,9 +1,10 @@
 pragma solidity =0.5.16;
 
-import "../modules/Managerable.sol";
-import "../modules/Halt.sol";
+import "../Halt.sol";
+import "../Operator.sol";
+import "../multiSignatureClient.sol";
 
-contract TokenConverterData is Managerable,Halt {
+contract TokenConverterData is multiSignatureClient,Operator,Halt {
     //the locjed reward info
     struct lockedReward {
         uint256 startTime; //this tx startTime for locking
@@ -16,8 +17,8 @@ contract TokenConverterData is Managerable,Halt {
         uint256 totalIdx;//the total number for converting tx
     }
     
-    address public cfnxAddress; //cfnx token address
-    address public fnxAddress;  //fnx token address
+    address public cphxAddress; //cfnx token address
+    address public phxAddress;  //fnx token address
     uint256 public timeSpan = 30*24*3600;//time interval span time ,default one month
     uint256 public dispatchTimes = 6;    //allocation times,default 6 times
     uint256 public txNum = 100; //100 times transfer tx 
@@ -34,10 +35,10 @@ contract TokenConverterData is Managerable,Halt {
     /**
      * @dev Emitted when `owner` locked  `amount` FPT, which net worth is  `worth` in USD. 
      */
-    event InputCfnx(address indexed owner, uint256 indexed amount,uint256 indexed worth);
+    event InputCphx(address indexed owner, uint256 indexed amount,uint256 indexed worth);
     /**
      * @dev Emitted when `owner` burned locked  `amount` FPT, which net worth is  `worth` in USD.
      */
-    event ClaimFnx(address indexed owner, uint256 indexed amount,uint256 indexed worth);
+    event ClaimPhx(address indexed owner, uint256 indexed amount,uint256 indexed worth);
 
 }

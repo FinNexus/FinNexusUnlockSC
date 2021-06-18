@@ -1,7 +1,7 @@
 pragma solidity =0.5.16;
 import "./TokenConverterData.sol";
-import "../modules/SafeMath.sol";
-import "../ERC20/IERC20.sol";
+import "../SafeMath.sol";
+import "../Token/IERC20.sol";
 
 
 /**
@@ -12,8 +12,8 @@ import "../ERC20/IERC20.sol";
 contract TokenConverter is TokenConverterData {
     using SafeMath for uint256;
     modifier inited (){
-    	  require(cfnxAddress!=address(0));
-    	  require(fnxAddress!=address(0));
+    	  require(cphxAddress !=address(0));
+    	  require(phxAddress !=address(0));
     	  _;
     } 
 
@@ -27,12 +27,19 @@ contract TokenConverter is TokenConverterData {
     /**
      * @dev constructor function. set FNX minePool contract address. 
      */ 
-    function setParameter(address _cfnxAddress,address _fnxAddress,uint256 _timeSpan,uint256 _dispatchTimes,uint256 _txNum) onlyOwner public{
-        if (_cfnxAddress != address(0))
-            cfnxAddress = _cfnxAddress;
+    function setParameter(  address _cphxAddress,
+                            address _phxAddress,
+                            uint256 _timeSpan,
+                            uint256 _dispatchTimes,
+                            uint256 _txNum)
+        onlyOperator(0)
+        public
+    {
+        if (_cphxAddress != address(0))
+            cphxAddress = _cphxAddress;
             
-        if (_fnxAddress != address(0))
-            fnxAddress = _fnxAddress;
+        if (_phxAddress != address(0))
+            phxAddress = _phxAddress;
             
         if (_timeSpan != 0) 
             timeSpan = _timeSpan;
@@ -49,9 +56,13 @@ contract TokenConverter is TokenConverterData {
      * @dev getting back the left mine token
      * @param reciever the reciever for getting back mine token
      */
-    function getbackLeftFnx(address reciever)  public onlyOwner {
-        uint256 bal =  IERC20(fnxAddress).balanceOf(address(this));
-        IERC20(fnxAddress).transfer(reciever,bal);
+    function getbackLeftPhx(address reciever)
+        public
+        onlyOperator(0)
+        validCall
+    {
+        uint256 bal =  IERC20(phxAddress).balanceOf(address(this));
+        IERC20(phxAddress).transfer(reciever,bal);
     }  
 
     /**
@@ -67,10 +78,10 @@ contract TokenConverter is TokenConverterData {
      * @dev user input cnfx to get fnx
      * @param amount fnx amount
      */ 
-    function inputCfnxForInstallmentPay(uint256 amount) external inited {
+    function inputCphxForInstallmentPay(uint256 amount) external inited {
         require(amount>0,"amount should be bigger than 0");
         
-        IERC20(cfnxAddress).transferFrom(msg.sender,address(this),amount);
+        IERC20(cphxAddress).transferFrom(msg.sender,address(this),amount);
         uint256 idx = now.div(24*3600);//lockedIndexs[msg.sender].totalIdx;
 
         userTxIdxs[msg.sender].push(idx);
@@ -95,16 +106,16 @@ contract TokenConverter is TokenConverterData {
 
         lockedBalances[msg.sender] = lockedBalances[msg.sender].add(amount.sub(divAmount));
 
-        IERC20(fnxAddress).transfer(msg.sender,divAmount);
+        IERC20(phxAddress).transfer(msg.sender,divAmount);
 
-        emit InputCfnx(msg.sender,amount,divAmount);
+        emit InputCphx(msg.sender,amount,divAmount);
     }
     
       /**
      * @dev user user claim expired reward
      */ 
     function claimFnxExpiredReward() external inited {
-        require(fnxAddress!=address(0),"fnx token should be set");
+        require(phxAddress !=address(0),"phx token should be set");
         
         uint256 txcnt = 0;
         uint256 idx = lockedIndexs[msg.sender].beginIdx;
@@ -160,9 +171,9 @@ contract TokenConverter is TokenConverterData {
         
         lockedBalances[msg.sender] = lockedBalances[msg.sender].sub(totalRet);
         //transfer back to user
-        IERC20(fnxAddress).transfer(msg.sender,totalRet);
+        IERC20(phxAddress).transfer(msg.sender,totalRet);
         
-        emit ClaimFnx(msg.sender,totalRet,txcnt);
+        emit ClaimPhx(msg.sender,totalRet,txcnt);
     }
     
       /**
@@ -170,7 +181,7 @@ contract TokenConverter is TokenConverterData {
      * @param _user the user address
      */ 
     function getClaimAbleBalance(address _user) public view returns (uint256) {
-        require(fnxAddress!=address(0),"fnx token should be set");
+        require(phxAddress !=address(0),"phx token should be set");
         
         uint256 txcnt = 0;
         uint256 idx = lockedIndexs[_user].beginIdx;

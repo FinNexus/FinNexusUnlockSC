@@ -1,35 +1,66 @@
 pragma solidity =0.5.16;
 import "./TokenConverterData.sol";
-import "../Proxy/baseProxy.sol";
+import "../proxy/ZiplinProxy.sol";
 
-contract TokenConverterProxy is TokenConverterData,baseProxy {
-    
-    constructor (address implementation_) baseProxy(implementation_) public{
+contract TokenConverterProxy is TokenConverterData,Proxy {
+
+    event Upgraded(address indexed implementation);
+
+    constructor(address _implAddress,address _multiSignature)
+        multiSignatureClient(_multiSignature)
+        public
+    {
+        _setImplementation(_implAddress);
     }
-    
-    function getbackLeftFnx(address /*reciever*/)  public {
-        delegateAndReturn();
+
+
+
+    /**
+     * @dev Storage slot with the address of the current implementation.
+     * This is the keccak-256 hash of "org.zeppelinos.proxy.implementation", and is
+     * validated in the constructor.
+     */
+    bytes32 internal constant IMPLEMENTATION_SLOT = keccak256("org.Phoenix.implementation.converter");
+
+    function proxyType() public pure returns (uint256){
+        return 2;
     }
-    
-   function setParameter(address /*_cfnxAddress*/,address /*_fnxAddress*/,uint256 /*_timeSpan*/,uint256 /*_dispatchTimes*/,uint256 /*_txNum*/) public  {
-        delegateAndReturn();
-   }
-   
-   function lockedBalanceOf(address /*account*/) public view returns (uint256){
-         delegateToViewAndReturn();     
-   }
-   
-   
-   function inputCfnxForInstallmentPay(uint256 /*amount*/) public {
-         delegateAndReturn();     
-   }
-   
-   function claimFnxExpiredReward() public {
-        delegateAndReturn(); 
-   }
-   
-   function getClaimAbleBalance(address ) public view returns (uint256) {
-        delegateToViewAndReturn();     
-   }
+
+    function implementation() public view returns (address) {
+        return _implementation();
+    }
+    /**
+     * @dev Returns the current implementation.
+     * @return Address of the current implementation
+     */
+    function _implementation() internal view returns (address impl) {
+        bytes32 slot = IMPLEMENTATION_SLOT;
+        assembly {
+            impl := sload(slot)
+        }
+    }
+
+    /**
+     * @dev Upgrades the proxy to a new implementation.
+     * @param newImplementation Address of the new implementation.
+     */
+    function _upgradeTo(address newImplementation)  public onlyOperator(1) validCall {
+        _setImplementation(newImplementation);
+        emit Upgraded(newImplementation);
+    }
+
+    /**
+     * @dev Sets the implementation address of the proxy.
+     * @param newImplementation Address of the new implementation.
+     */
+    function _setImplementation(address newImplementation) internal {
+        require(ZOSLibAddress.isContract(newImplementation), "Cannot set a proxy implementation to a non-contract address");
+
+        bytes32 slot = IMPLEMENTATION_SLOT;
+
+        assembly {
+            sstore(slot, newImplementation)
+        }
+    }
     
 }

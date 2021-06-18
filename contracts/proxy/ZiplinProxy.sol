@@ -1,3 +1,5 @@
+pragma solidity =0.5.16;
+
 library ZOSLibAddress {
     /**
      * Returns whether the target address is a contract
