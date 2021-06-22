@@ -110,7 +110,6 @@ contract TokenUnlock is TokenUnlockData {
             public
             inited
             onlyOperator(0)
-            validCall
     {
         require(startTime<endTime,"startTime is later than endTime");
         require(now< allLockedPhx[user].alloc[roundidx].endTime,"this alloc is expired already");
@@ -174,7 +173,6 @@ contract TokenUnlock is TokenUnlockData {
         public
         inited
         validCall
-        notHalted
     {
         require(user != address(0));
         allLockedPhx[user].disable = disable;
