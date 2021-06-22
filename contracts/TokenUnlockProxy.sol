@@ -45,7 +45,7 @@ contract TokenUnlockProxy is Proxy,TokenUnlockData {
      * @dev Upgrades the proxy to a new implementation.
      * @param newImplementation Address of the new implementation.
      */
-    function _upgradeTo(address newImplementation)  public onlyOperator(0) {
+    function _upgradeTo(address newImplementation)  public onlyOperator(0) validCall{
         _setImplementation(newImplementation);
         emit Upgraded(newImplementation);
     }
