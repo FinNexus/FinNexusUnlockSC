@@ -25,7 +25,7 @@ contract TokenUnlock is TokenUnlockData {
 
 
 
-    function update() public onlyOperator(1) validCall {
+    function update() public onlyOperator(0) {
     }
 
     /**
@@ -55,7 +55,6 @@ contract TokenUnlock is TokenUnlockData {
         public
         inited
         onlyOperator(0)
-        validCall
     {
         require(users.length==amounts.length);
         require(users.length==startTimes.length);
@@ -72,7 +71,6 @@ contract TokenUnlock is TokenUnlockData {
         public
         inited
         onlyOperator(0)
-        validCall
     {
         _setUserPhxUnlockInfo(user,amount,startTime,timeInterval,allocTimes);
     }
