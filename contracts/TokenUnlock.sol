@@ -172,6 +172,7 @@ contract TokenUnlock is TokenUnlockData {
     function setUserStatus(address user,bool disable)
         public
         inited
+        onlyOperator(0)
         validCall
     {
         require(user != address(0));
