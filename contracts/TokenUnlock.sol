@@ -109,7 +109,7 @@ contract TokenUnlock is TokenUnlockData {
     function resetUserPhxUnlockInfo(address user,uint256 roundidx,uint256 amount,uint256 startTime,uint256 endTime)
             public
             inited
-            onlyOperator(0)
+            onlyOwner
     {
         require(startTime<endTime,"startTime is later than endTime");
         require(now< allLockedPhx[user].alloc[roundidx].endTime,"this alloc is expired already");
